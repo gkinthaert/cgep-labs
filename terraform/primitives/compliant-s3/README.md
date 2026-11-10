@@ -1,16 +1,12 @@
-# Lab 2.3: Building Your First Compliant Resource (AWS S3)
+# Lab 2.3: Building a Compliant AWS S3 Resource
 
-Welcome to the first hands-on lab. This is the one that turns the ideas from the lectures into something running in a real cloud account, so we're going to move slowly and explain the *why* behind each step, not just the commands.
+Goals:  build one S3 bucket that satisfies five real NIST 800-53 controls, plus machine-readable proof that it does. And - No more screenshots as evidence!
 
-A quick word on who's in the room. Some of you come from GRC and have written plenty of controls but never touched Terraform. Some of you come from cloud or DevOps and have deployed plenty of infrastructure but never had to prove a control to an auditor. This lab is built for both of you. The GRC folks will recognize the control language and learn how it gets enforced in code. The technical folks will recognize the tooling and learn why the tagging, logging, and evidence steps aren't busywork. By the end, everyone will have built the same thing: one S3 bucket that satisfies five real NIST 800-53 controls, plus machine-readable proof that it does.
+## What is built?
 
-No screenshots. That's the theme of the whole course, and it starts here.
+Used Terraform to create an Amazon S3 bucket (cloud storage) that is locked down to a security baseline, and a second bucket that records who accessed the first one. Capture a file that proves the baseline is in place. That proof file is the thing an auditor should/will accept instead of a screenshot, because it comes straight from the system and can't be faked by cropping a browser window.
 
-## What you'll build, in plain language
-
-You'll use Terraform to create an Amazon S3 bucket (cloud storage) that is locked down to a security baseline, and a second bucket that records who accessed the first one. Then you'll capture a file that proves the baseline is in place. That proof file is the thing an auditor would accept instead of a screenshot, because it comes straight from the system and can't be faked by cropping a browser window.
-
-The five controls you'll satisfy, translated out of NIST-speak:
+The five controls this satisfies:
 
 | Control | What it means in plain terms | Where it lives in your code |
 |---|---|---|
@@ -20,9 +16,7 @@ The five controls you'll satisfy, translated out of NIST-speak:
 | **AU-6** | Those records are kept somewhere you can actually review. | the separate log bucket |
 | **CM-6** | The resource is set to an approved configuration, and that's labeled and enforced. | required tags + versioning |
 
-You don't need to memorize the control IDs. You need to be able to point at a line of code and say which control it enforces, because that's the muscle every later lab builds on.
-
-## Learning objectives
+## Recap
 
 - Express NIST 800-53 controls as Terraform resources, and cite each control where it's enforced.
 - Capture pre- and post-deploy compliance evidence as JSON instead of screenshots.
@@ -31,24 +25,18 @@ You don't need to memorize the control IDs. You need to be able to point at a li
 
 ## Time and cost
 
-- Time: 45 to 60 minutes the first time, closer to 20 minutes on a repeat. Add 30 to 45 minutes if you have not done the one-time setup below yet.
+- Time: 45 to 60 minutes the first time, closer to 20 minutes on a repeat build. Add 30 to 45 minutes if you have not done the one-time setup below yet.
 - Cost: under one cent if you destroy the same day. Empty S3 buckets cost nothing to sit there. You pay fractions of a cent for the handful of API calls Terraform makes.
 
 ---
 
-## Before you begin
-
-If this is your first lab, set up [your tools](../getting-started/tools.md) and [your repo](../getting-started/repo-structure.md) first. Together they take about 30 to 45 minutes, once, and every later lab assumes they're done. You need Git Bash (or a native bash shell), Terraform `>= 1.6`, a working AWS CLI v2 profile, and a pushed `cgep-labs` repository.
-
-The rest of this guide assumes that's in place. Commands below use `--profile default`; if you named your AWS CLI profile something else, substitute it.
-
 # Build the compliant bucket
 
-Now the actual lab. Make sure you're in the repo root (`cgep-labs`) and your AWS CLI profile is working.
+Start from repo root (`cgep-labs`). Make sure the AWS CLI profile is working.
 
 ## How the pieces fit
 
-You're building two buckets. The **primary bucket** is where data would go. The **log bucket** quietly records every access to the primary one. Both buckets enforce the same baseline: encryption, versioning, a full public-access block, and the required compliance tags.
+We have two buckets. The **primary bucket** is where data would go. The **log bucket** quietly records every access to the primary one. Both buckets enforce the same baseline: encryption, versioning, a full public-access block, and the required compliance tags.
 
 ```
                 ┌──────────────────────────────┐
@@ -66,15 +54,15 @@ You're building two buckets. The **primary bucket** is where data would go. The 
    └────────────────────┘                └──────────────────────┘
 ```
 
-The `default_tags` block at the top is a small trick that pays off all course long: it stamps the four required compliance tags onto every taggable resource automatically, so you can't forget them on one resource and quietly fail CM-6.
+The `default_tags` block stamps the four required compliance tags onto every taggable resource automatically, so you can't forget them on one resource and quietly fail CM-6.
 
 ### Why we bother capturing evidence at all
 
-In production, you don't get to walk an auditor through your AWS console. They want proof that's hard to fake and easy to re-check: a file that came out of the system, that anyone can run the same command to reproduce. `terraform show -json` gives you exactly that. The bucket you build today is small. The habit of capturing its configuration as JSON is the whole point, and it's the thread that runs through every remaining lab.
+In production, you don't get to walk an auditor through your AWS console. They want proof that's hard to fake and easy to re-check: a file that came out of the system, that anyone can run the same command to reproduce. `terraform show -json` gives you exactly that. The bucket is small, but getting into the habit of capturing its configuration as JSON is the whole point
 
-## Step 1: Open the lab folder
+## Step 1: Open the working folder
 
-You already created the empty files during repo setup. Move into that folder so relative Terraform commands land in the right place:
+Create the files during repo setup. 
 
 ```bash
 # from the repo root (cgep-labs)
@@ -82,7 +70,7 @@ cd terraform/primitives/compliant-s3
 ls   # expect: main.tf  variables.tf  outputs.tf  README.md
 ```
 
-You're now sitting inside `terraform/primitives/compliant-s3/`, which is where this lab's `.tf` files live. The three `.tf` files split the work the way every Terraform project does: `main.tf` for the resources, `variables.tf` for the inputs, `outputs.tf` for the values you want back out.
+You're now sitting inside `terraform/primitives/compliant-s3/`, which is where the `.tf` files live. The three `.tf` files split the work the way every Terraform project does: `main.tf` for the resources, `variables.tf` for the inputs, `outputs.tf` for the values you want back out.
 
 ## Step 2: Write the base bucket and tags
 

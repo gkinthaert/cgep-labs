@@ -1,28 +1,28 @@
-# GRC Engineer GCP Portfolio
+# GRC Engineer GCE-P Portfolio
 
-This repository (`cgep-labs`) is a hands-on portfolio of Governance, Risk, and Compliance (GRC) engineering labs. Each lab turns a NIST 800-53 control into working infrastructure-as-code, policy-as-code, or automated evidence, with the goal of showing that compliance can be built, enforced, and proven through engineering rather than paperwork.
+This repository (`cgep-labs`) is a hands-on portfolio of Governance, Risk, and Compliance (GRC) engineering work. Each section turns a NIST 800-53 control into working infrastructure-as-code, policy-as-code, or automated evidence, showing that compliance can be built, enforced, and proven through engineering rather than paperwork.
 
-The labs span AWS and GCP and build on one another, moving from foundational setup, through compliant infrastructure, to automated enforcement, signed evidence, and machine-readable compliance documentation.
+This spans both AWS and GCP and are progesssively build on one another, moving from foundational setup, through compliant infrastructure, to automated enforcement, signed evidence, and machine-readable compliance documentation.
 
 ## Labs
 
-### Lab 1: Environment Setup
+### Lab 1: Initial Environment Setup (the base setup required)
 
-Installed Git Bash (Windows), Terraform, and the AWS CLI, then stood up the `cgep-labs` repository that holds all subsequent work.
+Installation of Git Bash (Windows), Terraform, and the AWS and Google Cloud CLIs, and standing up the `cgep-labs` repository that holds all subsequent work.
 
 ### Lab 2: Compliant Infrastructure and Evidence
 
 #### 2.1 Compliant AWS S3 Bucket
 
-Terraform files for a single AWS S3 bucket that satisfies five NIST 800-53 controls: **SC-28** (protection of information at rest), **AU-3** (content of audit records), **AU-6** (audit review, analysis, and reporting), **CM-6** (configuration settings), and **AC-3** (access enforcement). The configuration emits machine-readable evidence for every one of these controls.
+Terraform files for a single AWS S3 bucket that satisfies five NIST 800-53 controls: **SC-28** (protection of information at rest), **AU-3** (content of audit records), **AU-6** (audit review, analysis, and reporting), **CM-6** (configuration settings), and **AC-3** (access enforcement). This configuration emits machine-readable evidence for every one of these controls.  Evidence located at evidence/lab-2-3
 
 #### 2.2 Compliant GCP Terraform Module
 
-A Terraform module on GCP that hardcodes **SC-12** (cryptographic key establishment and management), **SC-13** (cryptographic protection), **SC-28**, **AU-11** (audit record retention), and **CM-6**, so consumers cannot turn the compliance floor off. The module also emits a compliance attestation.
+A Terraform module on GCP that hardcodes **SC-12** (cryptographic key establishment and management), **SC-13** (cryptographic protection), **SC-28**, **AU-11** (audit record retention), and **CM-6**, so consumers cannot turn the compliance floor off. The module also emits a compliance attestation. Evidence located at evidence/lab-2-4
 
 #### 2.3 Immutable Evidence Vault
 
-An S3 Object Lock vault that refuses deletion by design. Evidence is bundled, hashed, and uploaded, with the resulting `VersionId` recorded for traceability.
+An S3 Object Lock vault that refuses deletion by design. Evidence is bundled, hashed, and uploaded, with the resulting `VersionId` recorded for traceability. Evidence located at evidence/lab-2-5
 
 ### Lab 3: Policy as Code
 
