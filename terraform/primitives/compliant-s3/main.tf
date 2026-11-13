@@ -9,8 +9,8 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-2"
-
+  region  = "us-east-2"
+  profile = "lab-account"
   # CM-6: Configuration settings, required compliance tags applied to every
   # taggable resource by default. Removes the chance of forgetting them.
   default_tags {
